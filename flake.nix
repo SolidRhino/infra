@@ -1,46 +1,52 @@
 {
-  description = "An empty flake template that you can adapt to your own environment";
+  description = "A flake with pre-commit hooks";
 
-  # Flake inputs
-  inputs.nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1.0.tar.gz";
-
-  # Flake outputs
-  outputs = {
-    self,
-    nixpkgs,
-  }: let
-    # The systems supported for this flake
-    supportedSystems = [
-      "x86_64-linux" # 64-bit Intel/AMD Linux
-      "aarch64-linux" # 64-bit ARM Linux
-      "x86_64-darwin" # 64-bit Intel macOS
-      "aarch64-darwin" # 64-bit ARM macOS
-    ];
-
-    # Helper to provide system-specific attributes
-    forEachSupportedSystem = f:
-      nixpkgs.lib.genAttrs supportedSystems (system:
-        f {
-          pkgs = import nixpkgs {inherit system;};
-        });
-  in {
-    devShells = forEachSupportedSystem ({pkgs}: {
-      default = pkgs.mkShell {
-        # The Nix packages provided in the environment
-        # Add any you need here
-        packages = with pkgs; [
-          ansible
-          ansible-lint
-          just
-        ];
-
-        # Set any environment variables for your dev shell
-        env = {};
-
-        # Add any shell logic you want executed any time the environment is activated
-        shellHook = ''
-        '';
-      };
-    });
+  inputs = {
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    git-hooks-nix = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:cachix/git-hooks.nix";
+    };
   };
+
+  outputs = inputs @ {
+    self,
+    flake-parts,
+    ...
+  }:
+    flake-parts.lib.mkFlake
+    {inherit inputs;}
+    {
+      imports = [
+        inputs.git-hooks-nix.flakeModule
+      ];
+      systems = ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
+      perSystem = {
+        config,
+        pkgs,
+        ...
+      }: {
+        pre-commit.settings.hooks = {
+          ansible-lint.enable = true;
+          #alejandra.enable = true;
+          ripsecrets.enable = true;
+        };
+        # NOTE: You can also use `config.pre-commit.devShell`
+        devShells.default = pkgs.mkShell {
+          packages = with pkgs; [
+            ansible
+            ansible-lint
+            just
+
+            ripsecrets
+            alejandra
+          ];
+
+          shellHook = ''
+            ${config.pre-commit.installationScript}
+          '';
+        };
+      };
+    };
 }

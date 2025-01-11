@@ -1,14 +1,13 @@
-# Created by https://www.toptal.com/developers/gitignore/api/linux,macos,ansible,windows,direnv
-# Edit at https://www.toptal.com/developers/gitignore?templates=linux,macos,ansible,windows,direnv
-
 ### Nix ###
 flake.lock
+/.pre-commit-config.yaml
 
 ### Ansible ###
 *.retry
 galaxy_roles/
 
 ### direnv ###
+!.envrc
 .direnv
 
 ### Linux ###
@@ -84,5 +83,3 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-
-# End of https://www.toptal.com/developers/gitignore/api/linux,macos,ansible,windows,direnv
