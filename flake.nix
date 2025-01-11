@@ -29,7 +29,7 @@
       }: {
         pre-commit.settings.hooks = {
           ansible-lint.enable = true;
-          #alejandra.enable = true;
+          alejandra.enable = true;
           ripsecrets.enable = true;
         };
         # NOTE: You can also use `config.pre-commit.devShell`
