@@ -1,7 +1,4 @@
----
-- name: Update ubuntu
-
-- name: Install Docker
-  hosts: server
-  roles:
-    - geerlingguy.docker
+hosts: server
+roles:
+  - ansible-role-docker
+  - ansible-role-figurine
