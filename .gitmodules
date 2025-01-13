@@ -7,6 +7,3 @@
 [submodule "roles/ansible-role-docker"]
 	path = roles/ansible-role-docker
 	url = git@github.com:geerlingguy/ansible-role-docker.git
-[submodule "roles/argon-one"]
-	path = roles/argon-one
-	url = git@github.com:agarthetiger/argon-one.git
