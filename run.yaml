@@ -87,3 +87,4 @@
   roles:
     - ansible-role-docker
     - ansible-role-figurine
+    - ansible-role-argononed
