@@ -27,11 +27,11 @@
         pkgs,
         ...
       }: {
-        pre-commit.settings.hooks = {
-          ansible-lint.enable = true;
-          alejandra.enable = true;
-          ripsecrets.enable = true;
-        };
+        # pre-commit.settings.hooks = {
+        #   # ansible-lint.enable = true;
+        #   # alejandra.enable = true;
+        #   # ripsecrets.enable = true;
+        # };
         # NOTE: You can also use `config.pre-commit.devShell`
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
@@ -43,9 +43,9 @@
             alejandra
           ];
 
-          shellHook = ''
-            ${config.pre-commit.installationScript}
-          '';
+          # shellHook = ''
+          #   ${config.pre-commit.installationScript}
+          # '';
         };
       };
     };
