@@ -1,4 +1,89 @@
-hosts: server
-roles:
-  - ansible-role-docker
-  - ansible-role-figurine
+---
+- name: Configure RPi Server
+  hosts: server
+  become: true
+  vars:
+    ghostty_terminfo: "{{ lookup('pipe', 'infocmp -x ghostty') }}"
+
+  tasks:
+    # System packages
+    - name: Install plocate package
+      apt:
+        name: plocate
+        state: present
+
+    # Fish shell installation and configuration
+    - name: Add fish shell repository
+      apt_repository:
+        repo: ppa:fish-shell/release-3
+        state: present
+
+    - name: Install fish shell
+      apt:
+        name: fish
+        state: latest
+        update_cache: yes
+
+    - name: Change default shell to fish for user ivo
+      user:
+        name: ivo
+        shell: /usr/bin/fish
+
+    # Starship prompt installation
+    - name: Download and install Starship
+      shell: curl -sS https://starship.rs/install.sh | sh -s -- --yes
+      args:
+        creates: /usr/local/bin/starship
+
+    - name: Create fish config directory
+      become: false
+      file:
+        path: "/home/{{ ansible_user }}/.config/fish"
+        state: directory
+        mode: "0755"
+
+    - name: Configure fish shell
+      become: false
+      blockinfile:
+        path: "/home/{{ ansible_user }}/.config/fish/config.fish"
+        create: yes
+        mode: "0644"
+        block: |
+          # Disable welcome message
+          set -g fish_greeting ""
+
+          # Initialize starship prompt
+          starship init fish | source
+
+    # User configuration
+    - name: Create .hushlogin file to suppress last login message
+      become: false
+      file:
+        path: "/home/{{ ansible_user }}/.hushlogin"
+        state: touch
+        mode: "0644"
+
+    # Terminal configuration
+    - name: Setup Ghostty terminal
+      block:
+        - name: Create temporary ghostty terminfo file
+          copy:
+            content: "{{ ghostty_terminfo }}"
+            dest: "/tmp/ghostty.terminfo"
+            mode: "0644"
+
+        - name: Install Ghostty terminfo entries
+          command: tic -x /tmp/ghostty.terminfo
+          register: tic_result
+          changed_when: tic_result.rc == 0
+          failed_when: tic_result.rc != 0
+
+        - name: Clean up temporary file
+          file:
+            path: "/tmp/ghostty.terminfo"
+            state: absent
+
+  # External roles
+  roles:
+    - ansible-role-docker
+    - ansible-role-figurine
