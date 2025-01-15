@@ -1,5 +1,4 @@
 ### Nix ###
-flake.lock
 /.pre-commit-config.yaml
 
 ### Ansible ###
