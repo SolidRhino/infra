@@ -8,45 +8,53 @@
   tasks:
     # System packages
     - name: Install plocate package
-      apt:
+      ansible.builtin.apt:
         name: plocate
         state: present
 
     # Fish shell installation and configuration
     - name: Add fish shell repository
-      apt_repository:
+      ansible.builtin.apt_repository:
         repo: ppa:fish-shell/release-3
         state: present
 
     - name: Install fish shell
-      apt:
+      ansible.builtin.apt:
         name: fish
-        state: latest
-        update_cache: yes
+        state: present
+        update_cache: true
 
     - name: Change default shell to fish for user ivo
-      user:
+      ansible.builtin.user:
         name: ivo
         shell: /usr/bin/fish
 
     # Starship prompt installation
     - name: Download and install Starship
-      shell: curl -sS https://starship.rs/install.sh | sh -s -- --yes
+      ansible.builtin.get_url:
+        url: https://starship.rs/install.sh
+        dest: /tmp/starship-install.sh
+        mode: "0755"
+      register: download_script
+
+    - name: Install Starship
+      ansible.builtin.shell: /tmp/starship-install.sh --yes
       args:
+        executable: /bin/bash
         creates: /usr/local/bin/starship
 
     - name: Create fish config directory
       become: false
-      file:
+      ansible.builtin.file:
         path: "/home/{{ ansible_user }}/.config/fish"
         state: directory
         mode: "0755"
 
     - name: Configure fish shell
       become: false
-      blockinfile:
+      ansible.builtin.blockinfile:
         path: "/home/{{ ansible_user }}/.config/fish/config.fish"
-        create: yes
+        create: true
         mode: "0644"
         block: |
           # Disable welcome message
@@ -58,7 +66,7 @@
     # User configuration
     - name: Create .hushlogin file to suppress last login message
       become: false
-      file:
+      ansible.builtin.file:
         path: "/home/{{ ansible_user }}/.hushlogin"
         state: touch
         mode: "0644"
@@ -67,19 +75,19 @@
     - name: Setup Ghostty terminal
       block:
         - name: Create temporary ghostty terminfo file
-          copy:
+          ansible.builtin.copy:
             content: "{{ ghostty_terminfo }}"
             dest: "/tmp/ghostty.terminfo"
             mode: "0644"
 
         - name: Install Ghostty terminfo entries
-          command: tic -x /tmp/ghostty.terminfo
+          ansible.builtin.command: tic -x /tmp/ghostty.terminfo
           register: tic_result
           changed_when: tic_result.rc == 0
           failed_when: tic_result.rc != 0
 
         - name: Clean up temporary file
-          file:
+          ansible.builtin.file:
             path: "/tmp/ghostty.terminfo"
             state: absent
 
