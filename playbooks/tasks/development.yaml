@@ -21,6 +21,12 @@
         creates: "/home/{{ ansible_user }}/.cargo/bin/rustc"
       environment:
         PATH: "/home/{{ ansible_user }}/.cargo/bin:{{ ansible_env.PATH }}"
+      register: rust_install
+
+    - name: Show Rust installation output
+      ansible.builtin.debug:
+        msg: "{{ rust_install.stdout_lines }}"
+      when: rust_install.stdout is defined
 
     - name: Clean up rustup installer
       ansible.builtin.file:
@@ -32,12 +38,16 @@
       become: false
       ansible.builtin.shell: |
         source "$HOME/.cargo/env"
-        cargo install {{ item }}
+        echo "Installing {{ item }}..."
+        cargo install {{ item }} --verbose
       args:
         executable: /bin/bash
         creates: "/home/{{ ansible_user }}/.cargo/bin/{{ item }}"
       environment:
         PATH: "/home/{{ ansible_user }}/.cargo/bin:{{ ansible_env.PATH }}"
+        CARGO_TERM_PROGRESS_WHEN: "always"
+        CARGO_TERM_PROGRESS_WIDTH: "80"
+      register: cargo_install
       loop:
         - eza
         - bat
@@ -67,6 +77,11 @@
         PATH: "/home/{{ ansible_user }}/.cargo/bin:{{ ansible_env.PATH }}"
       register: cache_clean
       changed_when: "'removing' in cache_clean.stdout or 'removing' in cache_clean.stderr"
+
+    - name: Show cache cleaning results
+      ansible.builtin.debug:
+        msg: "{{ cache_clean.stdout_lines }}"
+      when: cache_clean.stdout is defined
 
 # Tool Configurations
 - name: Configure Development Tools
