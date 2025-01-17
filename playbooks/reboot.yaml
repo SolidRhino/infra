@@ -6,5 +6,4 @@
   tasks:
     - name: Reboot the server
       ansible.builtin.reboot:
-      tags:
-        - reboot
+      tags: [reboot]

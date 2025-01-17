@@ -1,0 +1,84 @@
+---
+# Development tools installation and configuration
+- name: Install Development Tools
+  block:
+    # Rust Installation
+    - name: Download rustup installer
+      become: false
+      ansible.builtin.get_url:
+        url: https://sh.rustup.rs
+        dest: /tmp/rustup.sh
+        mode: "0755"
+
+    - name: Install Rust and Cargo with stable toolchain
+      become: false
+      ansible.builtin.shell: |
+        ./rustup.sh -y
+        source "$HOME/.cargo/env"
+        rustup default stable
+      args:
+        chdir: /tmp
+        creates: "/home/{{ ansible_user }}/.cargo/bin/rustc"
+      environment:
+        PATH: "/home/{{ ansible_user }}/.cargo/bin:{{ ansible_env.PATH }}"
+
+    - name: Clean up rustup installer
+      ansible.builtin.file:
+        path: /tmp/rustup.sh
+        state: absent
+
+    # Cargo installations
+    - name: Install cargo packages
+      become: false
+      ansible.builtin.shell: |
+        source "$HOME/.cargo/env"
+        cargo install {{ item }}
+      args:
+        executable: /bin/bash
+        creates: "/home/{{ ansible_user }}/.cargo/bin/{{ item }}"
+      environment:
+        PATH: "/home/{{ ansible_user }}/.cargo/bin:{{ ansible_env.PATH }}"
+      loop:
+        - eza
+        - bat
+        - zoxide
+        - cargo-update
+        - cargo-cache
+
+    - name: Clean cargo cache
+      become: false
+      ansible.builtin.shell: |
+        source "$HOME/.cargo/env"
+        cargo cache --autoclean
+      args:
+        executable: /bin/bash
+      environment:
+        PATH: "/home/{{ ansible_user }}/.cargo/bin:{{ ansible_env.PATH }}"
+      register: cache_clean
+      changed_when: "'removing' in cache_clean.stdout or 'removing' in cache_clean.stderr"
+
+# Tool Configurations
+- name: Configure Development Tools
+  block:
+    # Bat Configuration
+    - name: Create bat config directory
+      become: false
+      ansible.builtin.file:
+        path: "/home/{{ ansible_user }}/.config/bat"
+        state: directory
+        mode: "0755"
+
+    - name: Configure bat
+      become: false
+      ansible.builtin.copy:
+        dest: "/home/{{ ansible_user }}/.config/bat/config"
+        mode: "0644"
+        content: |
+          # Set the theme to "TwoDark"
+          --theme="TwoDark"
+
+          # Show line numbers, Git modifications and file header (but no grid)
+          --style="numbers,changes,header"
+
+          # Use italic text on the terminal (not supported on all terminals)
+          --italic-text=always

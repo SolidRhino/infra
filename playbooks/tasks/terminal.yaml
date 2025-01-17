@@ -1,0 +1,22 @@
+---
+# Terminal configuration tasks
+- name: Configure Terminal
+  block:
+    - name: Setup Ghostty terminal
+      block:
+        - name: Create temporary ghostty terminfo file
+          ansible.builtin.copy:
+            content: "{{ ghostty_terminfo }}"
+            dest: "/tmp/ghostty.terminfo"
+            mode: "0644"
+
+        - name: Install Ghostty terminfo entries
+          ansible.builtin.command: tic -x /tmp/ghostty.terminfo
+          register: tic_result
+          changed_when: tic_result.rc == 0
+          failed_when: tic_result.rc != 0
+
+        - name: Clean up temporary file
+          ansible.builtin.file:
+            path: "/tmp/ghostty.terminfo"
+            state: absent

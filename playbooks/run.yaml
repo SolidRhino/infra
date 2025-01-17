@@ -1,0 +1,47 @@
+---
+- name: Configure RPi Server
+  hosts: server
+  become: true
+  vars:
+    ghostty_terminfo: "{{ lookup('pipe', 'infocmp -x ghostty') }}"
+
+  # Pre-tasks: Ensure system is ready
+  pre_tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+  # Main tasks
+  tasks:
+    # Import task files
+    - name: Import system configuration tasks
+      ansible.builtin.import_tasks: tasks/system.yaml
+      tags: [system, setup]
+
+    - name: Import development tools tasks
+      ansible.builtin.import_tasks: tasks/development.yaml
+      tags: [development, setup]
+
+    - name: Import shell configuration tasks
+      ansible.builtin.import_tasks: tasks/shell.yaml
+      tags: [shell, setup]
+
+    - name: Import terminal configuration tasks
+      ansible.builtin.import_tasks: tasks/terminal.yaml
+      tags: [terminal, setup]
+
+    - name: Import overclocking tasks
+      ansible.builtin.import_tasks: tasks/overclocking.yaml
+      tags: [overclock]
+
+  # Roles
+  roles:
+    - role: ansible-role-docker
+      tags: [docker]
+
+    - role: ansible-role-figurine
+      tags: [figurine]
+
+    - role: ansible-role-argononed
+      tags: [argononed]

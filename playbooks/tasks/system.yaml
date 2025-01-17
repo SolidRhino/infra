@@ -1,0 +1,21 @@
+---
+# System base configuration tasks
+- name: Base System Configuration
+  block:
+    - name: Install system packages
+      ansible.builtin.apt:
+        name:
+          - plocate
+          - curl
+          - build-essential
+          - gcc
+          - pkg-config
+          - libssl-dev
+        state: present
+
+    - name: Create .hushlogin file to suppress last login message
+      become: false
+      ansible.builtin.file:
+        path: "/home/{{ ansible_user }}/.hushlogin"
+        state: touch
+        mode: "0644"
