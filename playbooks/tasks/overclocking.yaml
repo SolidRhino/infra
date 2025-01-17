@@ -4,54 +4,60 @@
   tags:
     - overclock
   block:
-    - name: Check if argononed service is installed
-      ansible.builtin.stat:
-        path: /etc/systemd/system/argononed.service
-      register: argononed_service
-
-    - name: Check argononed service status
-      ansible.builtin.service_facts:
-      when: argononed_service.stat.exists
-
     - name: Check if config.txt exists
       ansible.builtin.stat:
         path: /boot/firmware/config.txt
       register: config_exists
-      when:
-        - argononed_service.stat.exists
-        - ansible_facts.services['argononed.service'].state == 'running'
 
-    - name: Create backup of config.txt
-      ansible.builtin.copy:
-        src: /boot/firmware/config.txt
-        dest: /boot/firmware/config.txt.bak
-        remote_src: true
-        mode: "0644"
-        owner: root
-        group: root
-      when:
-        - argononed_service.stat.exists
-        - ansible_facts.services['argononed.service'].state == 'running'
-        - config_exists.stat.exists
+    - name: Check for existing overclock configuration
+      ansible.builtin.command: grep -E "^(over_voltage=6|arm_freq=2000|gpu_freq=600)" /boot/firmware/config.txt
+      register: overclock_check
+      changed_when: false
+      failed_when: false
+      when: config_exists.stat.exists
 
-    - name: Add overclocking settings
-      ansible.builtin.blockinfile:
-        path: /boot/firmware/config.txt
-        marker: "# {mark} OVERCLOCKING CONFIGURATION"
-        block: |
-          # Overclock settings
-          over_voltage=6
-          arm_freq=2000
-          gpu_freq=600
-      when:
-        - argononed_service.stat.exists
-        - ansible_facts.services['argononed.service'].state == 'running'
-        - config_exists.stat.exists
-      register: overclock_config
+    # Only proceed with overclocking if not already configured
+    - name: Configure overclocking
+      when: config_exists.stat.exists and overclock_check.rc != 0
+      block:
+        - name: Check if argononed service is installed
+          ansible.builtin.stat:
+            path: /etc/systemd/system/argononed.service
+          register: argononed_service
 
-    - name: Reboot if overclocking was configured
-      ansible.builtin.reboot:
-      when:
-        - argononed_service.stat.exists
-        - ansible_facts.services['argononed.service'].state == 'running'
-        - overclock_config.changed
+        - name: Check argononed service status
+          ansible.builtin.service_facts:
+          when: argononed_service.stat.exists
+
+        - name: Create backup of config.txt
+          ansible.builtin.copy:
+            src: /boot/firmware/config.txt
+            dest: /boot/firmware/config.txt.bak
+            remote_src: true
+            mode: "0644"
+            owner: root
+            group: root
+          when:
+            - argononed_service.stat.exists
+            - ansible_facts.services['argononed.service'].state == 'running'
+
+        - name: Add overclocking settings
+          ansible.builtin.blockinfile:
+            path: /boot/firmware/config.txt
+            marker: "# {mark} OVERCLOCKING CONFIGURATION"
+            block: |
+              # Overclock settings
+              over_voltage=6
+              arm_freq=2000
+              gpu_freq=600
+          when:
+            - argononed_service.stat.exists
+            - ansible_facts.services['argononed.service'].state == 'running'
+          register: overclock_config
+
+        - name: Reboot if overclocking was configured
+          ansible.builtin.reboot:
+          when:
+            - argononed_service.stat.exists
+            - ansible_facts.services['argononed.service'].state == 'running'
+            - overclock_config.changed
