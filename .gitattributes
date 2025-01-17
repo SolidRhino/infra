@@ -1,4 +1,9 @@
 .gitattributes !filter !diff
+
+# Encrypt all files that contain .enc in the filename
 **/*.enc filter=git-crypt diff=git-crypt
 **/*.enc.* filter=git-crypt diff=git-crypt
 **/*.enc/** filter=git-crypt diff=git-crypt
+
+# Encrypt .env files only in services directory and its subdirectories
+services/**/.env filter=git-crypt diff=git-crypt
