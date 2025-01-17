@@ -3,37 +3,14 @@
 - name: Configure Shell Environment
   block:
     # Fish Shell Installation
-    - name: Remove existing repository files
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: absent
-      with_items:
-        - /etc/apt/sources.list.d/fish-shell.list
-        - /etc/apt/sources.list.d/fish-shell-ubuntu-release-3-noble.list
-        - /etc/apt/keyrings/fish-shell.gpg
-        - /etc/apt/keyrings/fish-shell.asc
-        - /etc/apt/trusted.gpg.d/fish-shell.gpg
-        - /etc/apt/sources.list.d/fish-shell-ppa.list
-
-    - name: Manage fish shell repository
+    - name: Install and configure fish
       block:
-        - name: Remove fish repository if installed
-          ansible.builtin.apt_repository:
-            repo: "ppa:fish-shell/release-3"
-            state: absent
-
-        - name: Update apt cache
-          ansible.builtin.apt:
-            update_cache: true
-
         - name: Add fish shell repository
           ansible.builtin.apt_repository:
             repo: "ppa:fish-shell/release-3"
             state: present
             update_cache: true
 
-    - name: Install and configure fish
-      block:
         - name: Install fish shell
           ansible.builtin.apt:
             name: fish
