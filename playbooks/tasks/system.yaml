@@ -2,6 +2,14 @@
 # System base configuration tasks
 - name: Base System Configuration
   block:
+    # Remove htop package
+    - name: Remove htop package
+      ansible.builtin.apt:
+        name: htop
+        state: absent
+        purge: true
+        autoremove: true
+
     - name: Install system packages
       ansible.builtin.apt:
         name:
@@ -11,6 +19,7 @@
           - gcc
           - pkg-config
           - libssl-dev
+          - procps
         state: present
 
     - name: Create .hushlogin file to suppress last login message
