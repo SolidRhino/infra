@@ -36,21 +36,20 @@
 ## 📁 Directory Structure
 
 ```
-rpi-infrastructure/
+infra/
 ├── playbooks/
 │   ├── tasks/
 │   │   ├── system.yaml        # 🔧 System configuration tasks
 │   │   ├── development.yaml   # 👨‍💻 Development tools tasks
-│   │   ├── shell.yaml        # 🐟 Shell configuration tasks
-│   │   ├── terminal.yaml     # 💻 Terminal configuration tasks
-│   │   └── overclocking.yaml # ⚡ Overclocking configuration
-│   ├── run.yaml             # 🚀 Main playbook
-│   ├── update.yaml          # 🔄 Update playbook
-│   └── reboot.yaml          # 🔌 Reboot playbook
-├── roles/                   # 🎭 Ansible roles
-├── vars/                    # ⚙️ Variable files
-├── justfile                 # 📜 Just command definitions
-└── requirements.yaml        # 📋 Ansible requirements
+│   │   ├── shell.yaml         # 🐟 Shell configuration tasks
+│   │   ├── terminal.yaml      # 💻 Terminal configuration tasks
+│   │   └── overclocking.yaml  # ⚡ Overclocking configuration
+│   ├── run.yaml               # 🚀 Main playbook
+│   ├── update.yaml            # 🔄 Update playbook
+│   └── reboot.yaml            # 🔌 Reboot playbook
+├── roles/                     # 🎭 Ansible roles
+├── group_vars/                # ⚙️ Variable files
+└── justfile                   # 📜 Just command definitions
 ```
 
 ## 🚀 Quick Start
