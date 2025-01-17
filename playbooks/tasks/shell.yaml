@@ -81,13 +81,12 @@
               if type -q btm
                   # Function to handle process monitoring commands
                   function process_monitor
-                      btm $argv
+                      command btm $argv
                   end
 
-                  # Create aliases that point to the function
+                  # Create aliases for process monitoring
                   alias top="process_monitor"
                   alias htop="process_monitor"
-                  alias btm="process_monitor"
               end
 
 # Starship prompt installation and configuration
