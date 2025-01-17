@@ -44,6 +44,17 @@
         - zoxide
         - cargo-update
         - cargo-cache
+        - bottom
+      loop_control:
+        label: "Installing {{ item }}"
+
+    - name: Show cargo installation results
+      ansible.builtin.debug:
+        msg: "{{ item.stdout_lines }}"
+      loop: "{{ cargo_install.results }}"
+      when: item.stdout is defined
+      loop_control:
+        label: "{{ item.item }} installation output"
 
     - name: Clean cargo cache
       become: false
@@ -82,3 +93,65 @@
 
           # Use italic text on the terminal (not supported on all terminals)
           --italic-text=always
+
+    # Bottom Configuration
+    - name: Configure bottom
+      become: false
+      block:
+        - name: Create bottom config directory
+          ansible.builtin.file:
+            path: "/home/{{ ansible_user }}/.config/bottom"
+            state: directory
+            mode: "0755"
+
+        - name: Configure bottom
+          ansible.builtin.copy:
+            dest: "/home/{{ ansible_user }}/.config/bottom/bottom.toml"
+            mode: "0644"
+            content: |
+              # This is a default config file for bottom.
+
+              [flags]
+              # Whether to hide the average cpu entry.
+              hide_avg_cpu = false
+              # Whether to use dot markers rather than braille.
+              dot_marker = true
+              # The update rate of the application.
+              rate = 1000
+              # Whether to put the CPU legend to the left.
+              left_legend = false
+              # Whether to set CPU% on a process to be based on the total CPU or just current usage.
+              current_usage = true
+              # Whether to group processes with the same name together by default.
+              group_processes = true
+              # Whether to make process searching case sensitive by default.
+              case_sensitive = false
+              # Whether to make process searching look for matching the entire word by default.
+              whole_word = false
+              # Whether to make process searching use regex by default.
+              regex = true
+              # Defaults to Celsius.  Temperature is one of:
+              #  - "k" (Kelvin)
+              #  - "f" (Fahrenheit)
+              #  - "c" (Celsius)
+              temperature_type = "c"
+              # The default time interval (in milliseconds).
+              default_time_value = 60000
+              # The time delta on each zoom in/out action (in milliseconds).
+              time_delta = 15000
+              # Show memory values in the processes widget as values by default
+              mem_as_value = true
+              # Use basic mode by default in the processes widget.
+              basic = false
+
+              [colors]
+              # Enable custom colors
+              enable_status_color = true
+              # Semicolon separated array of colors for showing high to low values.
+              gradient = ["#FF0000", "#FFB86C", "#50FA7B"]
+              # Main bg/fg colors
+              table_header_color = "#FF79C6"
+              widget_title_color = "#BD93F9"
+              selected_text_color = "#282A36"
+              selected_bg_color = "#BD93F9"
+              graph_color = "#BD93F9"

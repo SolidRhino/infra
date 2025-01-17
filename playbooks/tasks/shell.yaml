@@ -100,6 +100,19 @@
                   alias tree="eza --tree --icons --group-directories-first"
               end
 
+              # bottom configuration and aliases
+              if type -q btm
+                  # Function to handle process monitoring commands
+                  function process_monitor
+                      btm $argv
+                  end
+
+                  # Create aliases that point to the function
+                  alias top="process_monitor"
+                  alias htop="process_monitor"
+                  alias btm="process_monitor"
+              end
+
 # Starship prompt installation and configuration
 - name: Configure Shell Prompt
   block:
