@@ -123,10 +123,6 @@ just dev-update server
 4. 🚀 Push to the branch
 5. 📬 Create a Pull Request
 
-## 📜 License
-
-[MIT License](LICENSE)
-
 ## 🙏 Acknowledgments
 
 - 🎮 [Ansible](https://www.ansible.com/)
