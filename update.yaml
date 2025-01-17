@@ -1,0 +1,87 @@
+---
+- name: Update RPi Server
+  hosts: server
+  become: true
+
+  tasks:
+    # System Updates
+    - name: System Package Updates
+      tags:
+        - system
+      block:
+        - name: Update apt cache
+          ansible.builtin.apt:
+            update_cache: true
+            cache_valid_time: 3600
+
+        - name: Upgrade all packages
+          ansible.builtin.apt:
+            upgrade: full
+            autoclean: true
+            autoremove: true
+          register: apt_upgrade
+
+    # Rust Updates
+    - name: Update Rust and Cargo Packages
+      become: false
+      tags:
+        - rust
+      block:
+        - name: Update Rust
+          ansible.builtin.shell: |
+            source "$HOME/.cargo/env"
+            rustup update
+          args:
+            executable: /bin/bash
+          environment:
+            PATH: "/home/{{ ansible_user }}/.cargo/bin:{{ ansible_env.PATH }}"
+          register: rustup_update
+          changed_when: "'info: downloading' in rustup_update.stdout"
+
+        - name: Update cargo packages
+          ansible.builtin.shell: |
+            source "$HOME/.cargo/env"
+            cargo install-update -a
+          args:
+            executable: /bin/bash
+          environment:
+            PATH: "/home/{{ ansible_user }}/.cargo/bin:{{ ansible_env.PATH }}"
+          register: cargo_update
+          changed_when: "'package updated' in cargo_update.stdout"
+
+        - name: Clean cargo cache
+          ansible.builtin.shell: |
+            source "$HOME/.cargo/env"
+            cargo cache --autoclean
+          args:
+            executable: /bin/bash
+          environment:
+            PATH: "/home/{{ ansible_user }}/.cargo/bin:{{ ansible_env.PATH }}"
+
+    # Starship Update
+    - name: Update Starship Prompt
+      tags:
+        - starship
+      block:
+        - name: Download latest starship installer
+          ansible.builtin.get_url:
+            url: https://starship.rs/install.sh
+            dest: /tmp/starship-install.sh
+            mode: "0755"
+
+        - name: Update Starship
+          ansible.builtin.command: /tmp/starship-install.sh --yes
+          register: starship_update
+          changed_when: "'info: installing' in starship_update.stdout"
+
+        - name: Clean up starship installer
+          ansible.builtin.file:
+            path: /tmp/starship-install.sh
+            state: absent
+
+    # System Reboot
+    - name: Reboot system if needed
+      tags:
+        - reboot
+      ansible.builtin.reboot:
+      when: apt_upgrade.changed or rustup_update.changed
