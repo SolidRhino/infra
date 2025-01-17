@@ -65,21 +65,39 @@
     - name: Update Shell Components
       tags: [shell]
       block:
-        - name: Download latest starship installer
-          ansible.builtin.get_url:
-            url: https://starship.rs/install.sh
-            dest: /tmp/starship-install.sh
-            mode: "0755"
+        - name: Get current starship version
+          ansible.builtin.command: starship --version
+          register: starship_current_version
+          changed_when: false
+          failed_when: false
 
-        - name: Update Starship
-          ansible.builtin.command: /tmp/starship-install.sh --yes
-          register: starship_update
-          changed_when: "'info: installing' in starship_update.stdout"
+        - name: Get latest starship version
+          ansible.builtin.uri:
+            url: https://api.github.com/repos/starship/starship/releases/latest
+            return_content: true
+          register: starship_latest_release
+          when: starship_current_version.rc == 0
 
-        - name: Clean up starship installer
-          ansible.builtin.file:
-            path: /tmp/starship-install.sh
-            state: absent
+        - name: Update Starship if needed
+          when: >
+            starship_current_version.rc == 0 and
+            starship_latest_release.json.tag_name[1:] is version(starship_current_version.stdout.split()[1], '>')
+          block:
+            - name: Download starship installer
+              ansible.builtin.get_url:
+                url: https://starship.rs/install.sh
+                dest: /tmp/starship-install.sh
+                mode: "0755"
+
+            - name: Update Starship
+              ansible.builtin.command: /tmp/starship-install.sh --yes
+              register: starship_update
+              changed_when: true
+
+            - name: Clean up starship installer
+              ansible.builtin.file:
+                path: /tmp/starship-install.sh
+                state: absent
 
     # System Reboot
     - name: Reboot system if needed

@@ -116,14 +116,27 @@
 # Starship prompt installation and configuration
 - name: Configure Shell Prompt
   block:
-    - name: Download starship installer
-      ansible.builtin.get_url:
-        url: https://starship.rs/install.sh
-        dest: /tmp/starship-install.sh
-        mode: "0755"
-      register: download_script
+    - name: Check current starship version
+      ansible.builtin.command: starship --version
+      register: starship_current_version
+      changed_when: false
+      failed_when: false
 
     - name: Install Starship
-      ansible.builtin.command: /tmp/starship-install.sh --yes
-      args:
-        creates: /usr/local/bin/starship
+      when: starship_current_version.rc != 0
+      block:
+        - name: Download starship installer
+          ansible.builtin.get_url:
+            url: https://starship.rs/install.sh
+            dest: /tmp/starship-install.sh
+            mode: "0755"
+
+        - name: Install Starship
+          ansible.builtin.command: /tmp/starship-install.sh --yes
+          args:
+            creates: /usr/local/bin/starship
+
+        - name: Clean up starship installer
+          ansible.builtin.file:
+            path: /tmp/starship-install.sh
+            state: absent
