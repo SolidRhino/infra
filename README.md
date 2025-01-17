@@ -56,8 +56,8 @@ infra/
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/rpi-infrastructure.git
-cd rpi-infrastructure
+git clone https://github.com/SolidRhino/infra.git
+cd infra
 ```
 
 2. Initialize the environment:
