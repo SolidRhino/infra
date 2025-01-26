@@ -1,2 +1,6 @@
 docker_users:
   - "ivo"
+
+docker_compose_generator_output_path: "/home/ivo/docker"
+docker_compose_generator_uid: "1000"
+docker_compose_generator_gid: "1003"

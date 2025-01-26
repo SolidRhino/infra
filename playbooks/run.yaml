@@ -47,3 +47,6 @@
 
     - role: ansible-role-argononed
       tags: [argononed]
+
+    - role: ansible-role-docker-compose-generator
+      tags: [compose docker]
