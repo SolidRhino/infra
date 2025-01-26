@@ -79,7 +79,7 @@ reqs *FORCE:
 
 # Manage Ansible vault (encrypt/decrypt/edit)
 vault ACTION:
-    EDITOR='code --wait' ansible-vault {{ACTION}} vars/secrets.enc.yaml
+    EDITOR='code --wait' ansible-vault {{ACTION}} group_vars/secrets.enc.yaml
 
 # Show Ansible facts for a host
 facts HOST:
