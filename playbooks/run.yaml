@@ -3,7 +3,7 @@
   hosts: server
   become: true
   vars_files:
-      - '../group_vars/secrets.enc.yaml'
+    - "../group_vars/secrets.enc.yaml"
   vars:
     ghostty_terminfo: "{{ lookup('pipe', 'infocmp -x ghostty') }}"
 
