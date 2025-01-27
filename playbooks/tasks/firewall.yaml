@@ -1,0 +1,32 @@
+---
+# UFW Configuration
+- name: Configure UFW to only allow Tailscale communication
+  block:
+    - name: Install UFW package
+      ansible.builtin.apt:
+        name: ufw
+        state: present
+
+    - name: Set default UFW policies
+      block:
+        - name: Deny all incoming traffic
+          community.general.ufw:
+            state: enabled
+            policy: deny
+            direction: incoming
+        - name: Allow all outgoing traffic
+          community.general.ufw:
+            state: enabled
+            policy: allow
+            direction: outgoing
+
+    - name: Allow all Tailscale traffic
+      community.general.ufw:
+        rule: allow
+        interface: tailscale0
+        direction: in
+        state: enabled
+
+    - name: Enable UFW
+      community.general.ufw:
+        state: enabled

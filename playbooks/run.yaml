@@ -37,6 +37,10 @@
       ansible.builtin.import_tasks: tasks/overclocking.yaml
       tags: [overclock]
 
+    - name: Import firewall tasks
+      ansible.builtin.import_tasks: tasks/firewall.yaml
+      tags: [firewall]
+
   # Roles
   roles:
     - role: ansible-role-docker
