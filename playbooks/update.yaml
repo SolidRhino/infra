@@ -1,5 +1,5 @@
 ---
-- name: Update RPi Server
+- name: Update Server
   hosts: server
   become: true
 

@@ -1,5 +1,5 @@
 ---
-- name: Configure RPi Server
+- name: Configure Server
   hosts: server
   become: true
   vars_files:
