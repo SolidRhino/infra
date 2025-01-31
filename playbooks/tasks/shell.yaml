@@ -116,3 +116,14 @@
           ansible.builtin.file:
             path: /tmp/starship-install.sh
             state: absent
+
+    - name: Configurate starship shell
+      become: false
+      ansible.builtin.blockinfile:
+        path: "/home/{{ ansible_user }}/.config/starship.toml"
+        create: true
+        mode: "0644"
+        marker: "# {mark} STARSHIP CONFIGURATION"
+        block: |
+          [container]
+          disabled = true
