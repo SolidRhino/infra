@@ -36,13 +36,17 @@
       ansible.builtin.import_tasks: tasks/terminal.yaml
       tags: [terminal, setup]
 
+    - name: Import firewall tasks
+      ansible.builtin.import_tasks: tasks/firewall.yaml
+      tags: [firewall, setup]
+
     - name: Import overclocking tasks
       ansible.builtin.import_tasks: tasks/overclocking.yaml
       tags: [overclock]
 
-    - name: Import firewall tasks
-      ansible.builtin.import_tasks: tasks/firewall.yaml
-      tags: [firewall]
+    - name: Import Caddy tasks
+      ansible.builtin.import_tasks: tasks/caddy.yaml
+      tags: [caddy]
 
   # Roles
   roles:
@@ -50,10 +54,10 @@
       tags: [docker]
 
     - role: ansible-role-figurine
-      tags: [figurine]
+      tags: [figurine, setup]
 
     - role: ansible-role-argononed
       tags: [argononed]
 
     - role: ansible-role-docker-compose-generator
-      tags: [compose docker]
+      tags: [compose]
