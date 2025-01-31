@@ -14,11 +14,19 @@
             state: enabled
             policy: deny
             direction: incoming
+
         - name: Allow all outgoing traffic
           community.general.ufw:
             state: enabled
             policy: allow
             direction: outgoing
+
+    - name: Allow all Private network traffic
+      community.general.ufw:
+        rule: allow
+        from_ip: 192.168.0.0/24
+        direction: in
+        state: enabled
 
     - name: Allow all Tailscale traffic
       community.general.ufw:
