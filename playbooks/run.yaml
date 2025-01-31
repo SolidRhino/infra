@@ -7,6 +7,7 @@
       ansible.builtin.import_tasks: handlers/main.yml
   vars_files:
     - "../group_vars/secrets.enc.yaml"
+    - "../group_vars/server.yaml"
   vars:
     ghostty_terminfo: "{{ lookup('pipe', 'infocmp -x ghostty') }}"
 
