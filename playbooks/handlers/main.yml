@@ -1,0 +1,21 @@
+---
+- name: Restart Caddy
+  community.docker.docker_container:
+    name: caddy
+    state: started
+    restart: true
+  register: caddy_restart
+  failed_when: >
+    caddy_restart.failed and
+    not 'No such container' in caddy_restart.msg
+
+- name: Format Caddyfile
+  ansible.builtin.command:
+    cmd: >-
+      docker run --rm
+      -v "/home/{{ ansible_user }}/docker/appdata/caddy/Caddyfile:/etc/caddy/Caddyfile"
+      caddy-custom caddy fmt
+      --overwrite /etc/caddy/Caddyfile
+  register: caddy_fmt
+  changed_when: caddy_fmt.rc == 0
+  failed_when: caddy_fmt.rc != 0

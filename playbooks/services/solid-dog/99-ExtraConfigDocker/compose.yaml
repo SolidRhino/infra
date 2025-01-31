@@ -1,0 +1,17 @@
+services:
+  
+networks:
+  proxy:
+  caddy-macvlan:
+    name: caddy-macvlan
+    driver: macvlan
+    driver_opts:
+      parent: eth0
+    ipam:
+      config:
+        - subnet: "192.168.50.0/24"
+          gateway: "192.168.50.1"
+
+volumes:
+  caddy_data:
+  caddy_config:

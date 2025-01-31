@@ -1,0 +1,16 @@
+services:
+  caddy:
+    image: caddy-custom
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+      - ./appdata/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+    networks:
+      caddy-macvlan:
+        ipv4_address: 192.168.50.5
+      proxy:

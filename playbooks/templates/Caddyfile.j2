@@ -1,0 +1,22 @@
+{
+    email {{ cf_email }} # Email address for Let's Encrypt registration
+    # Use CloudFlare DNS challenge for HTTPS certificates
+    acme_dns cloudflare {{ cf_api_token }} # CloudFlare API token
+}
+
+{% for domain in domains %}
+{{ domain.name }} {
+    {% for handler in domain.handle %}
+    {% if handler.type == 'reverse_proxy' %}
+    reverse_proxy {{ handler.target }}
+    {% elif handler.type == 'file_server' %}
+    root * {{ handler.root }}
+    file_server
+    {% endif %}
+    {% endfor %}
+
+    tls {
+        dns cloudflare {{ cf_api_token }}
+    }
+}
+{% endfor %}

@@ -2,6 +2,9 @@
 - name: Configure Server
   hosts: server
   become: true
+  handlers:
+    - name: Import main handlers
+      ansible.builtin.import_tasks: handlers/main.yml
   vars_files:
     - "../group_vars/secrets.enc.yaml"
   vars:

@@ -1,0 +1,64 @@
+---
+# Build custom Caddy Docker image
+- name: Configure Caddy Docker Image
+  block:
+    - name: Create temporary build directory
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: caddy-build
+      register: temp_build_dir
+
+    - name: Copy Dockerfile for Caddy
+      ansible.builtin.copy:
+        dest: "{{ temp_build_dir.path }}/Dockerfile"
+        mode: "0644"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        content: |
+          FROM caddy:2-builder-alpine AS builder
+
+          RUN xcaddy build \
+              --with github.com/caddy-dns/cloudflare
+
+          FROM caddy:2-alpine
+
+          COPY --from=builder /usr/bin/caddy /usr/bin/caddy
+
+    - name: Build Caddy Docker image
+      community.docker.docker_image:
+        name: caddy-custom
+        build:
+          path: "{{ temp_build_dir.path }}"
+          pull: true
+        source: build
+        force_source: true
+        state: present
+
+    - name: Clean up build directory
+      ansible.builtin.file:
+        path: "{{ temp_build_dir.path }}"
+        state: absent
+
+# Generate Caddyfile
+- name: Configure Caddyfile
+  become: false
+  tags: caddy_config
+  block:
+    - name: Create Caddy config directory
+      ansible.builtin.file:
+        path: "/home/{{ ansible_user }}/docker/appdata/caddy"
+        state: directory
+        mode: "0755"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    - name: Generate Caddyfile
+      ansible.builtin.template:
+        src: templates/Caddyfile.j2
+        dest: "/home/{{ ansible_user }}/docker/appdata/caddy/Caddyfile"
+        mode: "0644"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      notify:
+        - Format Caddyfile
+        - Restart Caddy
