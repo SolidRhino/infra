@@ -5,6 +5,9 @@ docker_compose_generator_output_path: "/home/ivo/docker"
 docker_compose_generator_uid: "1000"
 docker_compose_generator_gid: "1003"
 
+puid: "1000"
+pgid: "1003"
+
 domains:
   - name: "{{domain}}"
     handle:
