@@ -10,6 +10,10 @@ default:
 lint:
     ansible-lint playbooks/*.yaml playbooks/tasks/*.yaml
 
+# Automatically fix ansible-lint violations where possible
+lint-fix:
+    ansible-lint playbooks/*.yaml playbooks/tasks/*.yaml --fix
+
 # Run main configuration playbook
 run HOST *TAGS:
     ansible-playbook -b playbooks/run.yaml --limit {{HOST}} {{TAGS}}
