@@ -20,6 +20,8 @@
           - pkg-config
           - libssl-dev
           - procps
+          - git
+          - git-crypt
         state: present
 
     - name: Create .hushlogin file to suppress last login message
